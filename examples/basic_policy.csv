@@ -1,2 +1,3 @@
-p, /_ping, GET
-p, /v1.27/images/json, GET
+p, /v1.24/containers/*/exec, POST
+p, /v1.24/exec/:id/start, POST
+

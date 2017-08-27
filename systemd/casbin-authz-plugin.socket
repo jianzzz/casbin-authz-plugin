@@ -2,7 +2,7 @@
 Description=Docker RBAC & ABAC Authorization Plugin based on Casbin Socket for the API
 
 [Socket]
-ListenStream=/run/docker/plugins/casbin-authz-plugin.sock
+ListenStream=127.0.0.1:18081
 
 [Install]
 WantedBy=sockets.target

@@ -9,17 +9,22 @@ import (
 	"flag"
 	"github.com/docker/go-plugins-helpers/authorization"
 	"log"
-	"os/user"
-	"strconv"
-)
-
-const (
-	pluginSocket = "/run/docker/plugins/casbin-authz-plugin.sock"
+        "github.com/casbin/casbin/config"
 )
 
 var (
-	casbinConfig = flag.String("config", "casbin.conf", "Specifies the Casbin configuration file")
+	casbinConfig = flag.String("config", "/usr/lib/docker/casbin.conf", "Specifies the Casbin configuration file")
+
+	TOKEN = ""
 )
+
+func init() {
+	cfg, err := config.NewConfig(*casbinConfig)
+        if err != nil {
+                panic(err)
+        }
+	TOKEN = cfg.String("default::token")
+}
 
 func main() {
 	// Parse command line options.
@@ -33,10 +38,17 @@ func main() {
 	}
 
 	// Start service handler on the local sock
-	u, _ := user.Lookup("root")
-	gid, _ := strconv.Atoi(u.Gid)
 	handler := authorization.NewHandler(plugin)
-	if err := handler.ServeUnix(pluginSocket, gid); err != nil {
+	
+	cfg, err := config.NewConfig(*casbinConfig)
+        if err != nil {
+                panic(err)
+        }
+
+        ip := cfg.String("default::app_ip")
+	port := cfg.String("default::app_port")
+
+	if err := handler.ServeTCP("casbin-authz-plugin",ip+":"+port,"",nil); err != nil {
 		log.Fatal(err)
 	}
 }
